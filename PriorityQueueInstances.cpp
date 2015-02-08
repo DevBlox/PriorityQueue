@@ -9,4 +9,4 @@
 // it's also recommended to remove unused ones,
 // because it generates useless code.
 
-template class PriorityQueue<int>;
+template class Uni::PriorityQueue<int>;

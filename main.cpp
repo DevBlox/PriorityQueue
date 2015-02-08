@@ -8,7 +8,9 @@ bool function(int a, int b)
 
 int main(int argc, char **argv)
 {
-	PriorityQueue<int> priorityQueue(function);
-	std::cout << "It works!" << std::endl;
+	Uni::PriorityQueue<int> priorityQueue(function);
+	priorityQueue << 5 << 10 << 5 << 64 << 80;
+	
+	std::cout << "It works!: " << priorityQueue.Next() << std::endl;
 	return 0;
 }

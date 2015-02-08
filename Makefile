@@ -1,7 +1,7 @@
 CC=g++
 CROSS_COMPILE?=
 COMPILER=$(CROSS_COMPILE)$(CC)
-CFLAGS=-I./include -I. -Wall 
+CFLAGS=-I./include -I. -Wall -O3
 LFLAGS=
 TARGET=testqueue
 SRC_DIR=src/
