@@ -74,9 +74,10 @@ template<typename Type> void Uni::PriorityQueue<Type>::Reallocate()
 template<typename Type> void Uni::PriorityQueue<Type>::Add(Type a)
 {
 	unsigned int i = 0;
-	while (determine(a, workingArray[i])) i++;
+	while (determine(a, workingArray[i]) && i < numElements) i++;
 	Offset(i);
 	workingArray[i] = a;
+	numElements++;
 }
 
 template<typename Type> void Uni::PriorityQueue<Type>::Add(Type *arr, unsigned int num)
@@ -87,6 +88,7 @@ template<typename Type> void Uni::PriorityQueue<Type>::Add(Type *arr, unsigned i
 		while (determine(arr[i], workingArray[j])) j++;
 		Offset(j);
 		workingArray[j] = arr[i];
+		numElements++;
 	}
 }
 
@@ -98,6 +100,7 @@ template<typename Type> void Uni::PriorityQueue<Type>::Add(std::vector<Type> arr
 		while (determine(arr.at(i), workingArray[j])) j++;
 		Offset(j);
 		workingArray[j] = arr.at(i);
+		numElements++;
 	}
 }
 
@@ -115,13 +118,10 @@ template<typename Type> Uni::PriorityQueue<Type>& Uni::PriorityQueue<Type>::oper
 
 template<typename Type> void Uni::PriorityQueue<Type>::Offset(unsigned int index)
 {
-	Type temp;
-	if (numElements + 1 >= currentlyAllocated) Reallocate();
-	for (unsigned int i = index; i < numElements; i++)
-	{
-		temp = workingArray[i + 1];
-		workingArray[i + 1] = workingArray[i];
-	}
+	if (!numElements) return;
+	if (numElements + 1 > currentlyAllocated) Reallocate();
+	for (unsigned int i = numElements; i > index; i--)
+		workingArray[i] = workingArray[i - 1];
 }
 
 template<typename Type> Type Uni::PriorityQueue<Type>::Next()
@@ -142,10 +142,13 @@ template<typename Type> Type Uni::PriorityQueue<Type>::operator[](unsigned int i
 
 template<typename Type> void Uni::PriorityQueue<Type>::Clear()
 {
+	delete [] workingArray;
+	workingArray = new Type[startingReserve];
+	currentlyAllocated = startingReserve;
 	numElements = 0;
 }
 
-template<typename Type> void Uni::PriorityQueue<Type>::Erase(unsigned int index)
+template<typename Type> void Uni::PriorityQueue<Type>::EraseAt(unsigned int index)
 {
 	numElements--;
 	for (unsigned int i = index; i < numElements; i++)
@@ -157,10 +160,15 @@ template<typename Type> void Uni::PriorityQueue<Type>::Erase(Type a)
 	for (unsigned int i = 0; i < numElements; i++)
 	{
 		if (workingArray[i] == a) {
-			Erase(i);
+			EraseAt(i);
 			break;
 		}
 	}
+}
+
+template<typename Type> unsigned int Uni::PriorityQueue<Type>::Size()
+{
+	return numElements;
 }
 
 #endif // PRIORITY_QUEUE_IMPLEMENTATION

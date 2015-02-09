@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace Uni
 {
@@ -26,10 +27,12 @@ namespace Uni
 			PriorityQueue<Type>& operator<<(std::vector<Type>);
 			Type Next(); // Retrieves the next element in queue and removes it
 			Type At(unsigned int); // Retrieves the element at index without removing it
-			void Erase(unsigned int); // Erases element at index
+			void EraseAt(unsigned int); // Erases element at index
 			void Erase(Type); // Erases matching element
 			Type operator[](unsigned int); // Same as At()
 			void Clear(); // Clears the entire queue
+			
+			unsigned int Size(); // Get number of elements
 			
 		private:
 		
