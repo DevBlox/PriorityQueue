@@ -1,6 +1,8 @@
 #include <PriorityQueue.h>
 #include <PriorityQueue_impl.h> // <- Include for implicit instantiation
 
+#include <TestStruct.h>
+
 // This code compiles all needed type instances of a template.
 // This is the explicit method of compilation for this code.
 // You can implicitly instantiate code, for that
@@ -10,3 +12,4 @@
 // because it generates useless code.
 
 template class Uni::PriorityQueue<int>;
+template class Uni::PriorityQueue<TestStruct>;

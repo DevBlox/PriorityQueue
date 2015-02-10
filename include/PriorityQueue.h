@@ -2,8 +2,6 @@
 #define UNI_PRIORITY_QUEUE
 
 #include <vector>
-#include <string>
-#include <iostream>
 
 namespace Uni
 {

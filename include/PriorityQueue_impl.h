@@ -83,25 +83,13 @@ template<typename Type> void Uni::PriorityQueue<Type>::Add(Type a)
 template<typename Type> void Uni::PriorityQueue<Type>::Add(Type *arr, unsigned int num)
 {
 	for (unsigned int i = 0; i < num; i++)
-	{
-		unsigned int j = 0;
-		while (determine(arr[i], workingArray[j])) j++;
-		Offset(j);
-		workingArray[j] = arr[i];
-		numElements++;
-	}
+		Add(arr[i]);
 }
 
 template<typename Type> void Uni::PriorityQueue<Type>::Add(std::vector<Type> arr)
 {
 	for (unsigned int i = 0; i < arr.size(); i++)
-	{
-		unsigned int j = 0;
-		while (determine(arr.at(i), workingArray[j])) j++;
-		Offset(j);
-		workingArray[j] = arr.at(i);
-		numElements++;
-	}
+		Add(arr[i]);
 }
 
 template<typename Type> Uni::PriorityQueue<Type>& Uni::PriorityQueue<Type>::operator<<(Type a)
@@ -126,7 +114,7 @@ template<typename Type> void Uni::PriorityQueue<Type>::Offset(unsigned int index
 
 template<typename Type> Type Uni::PriorityQueue<Type>::Next()
 {
-	numElements--;
+	if (numElements) numElements--;
 	return workingArray[numElements];
 }
 
