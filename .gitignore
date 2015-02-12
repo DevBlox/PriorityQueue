@@ -1,4 +1,8 @@
 *.o
 *.exe
+*.dll
+*.a
+*.def
 bin/
 obj/
+lib/
