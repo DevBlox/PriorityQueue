@@ -2,6 +2,7 @@
 #define UNI_PRIORITY_QUEUE
 
 #include <vector>
+#include <cstddef>
 
 namespace Uni
 {
@@ -17,37 +18,52 @@ namespace Uni
 			/// Destructor
 			~PriorityQueue();
 			
-			/// Manipulating elements
+			/// Adding elements
 			void Add(Type); // Adds element according to the determining function
 			void Add(Type*, unsigned int); // Adds multiple elements at once, mustn't be in order
 			void Add(std::vector<Type>); // Same as above, but for vectors
+			
+			/// Overloaded operators
 			PriorityQueue<Type>& operator<<(Type); // These two do the same thing as Add() method
 			PriorityQueue<Type>& operator<<(std::vector<Type>);
+			Type operator[](unsigned int); // Same as At()
+			PriorityQueue<Type> operator+(PriorityQueue<Type>); // Same as Join
+			
+			/// Getting elements
 			Type Next(); // Retrieves the next element in queue and removes it
 			Type At(unsigned int); // Retrieves the element at index without removing it
-			void EraseAt(unsigned int); // Erases element at index
-			void Erase(Type); // Erases matching element
-			Type operator[](unsigned int); // Same as At()
+			
+			/// Whole class cleaning
 			void Clear(); // Clears the entire queue
 			
+			/// Joining
+			PriorityQueue<Type> Join(PriorityQueue<Type>); // Joint two PriorityQueue together
+			
+			/// Checks
+			bool IsEmpty(); // Check if empty
 			unsigned int Size(); // Get number of elements
 			
-		private:
+		protected:
 		
-			/// Constant
-			const unsigned int startingReserve; // With what number of elements the queue should start with
-			const unsigned int reserveIncrement; // How big will the increments of size be
+			/// Linked list structures
+			struct Node
+			{
+				Node(Type); // Constructor
+			
+				Type data;
+				Node *next;
+				Node *prev;
+			};
+			
+			Node *head;
+			Node *tail;
 		
-			/// Main working variables
-			Type *workingArray; // Working array
-			unsigned int currentlyAllocated; // What size is now allocated to the array
 			unsigned int numElements; // Where is the last element located
 			
 			/// Determining function/method pointer
 			bool (*determine)(Type, Type);
 			
-			void Reallocate(); // Increases the allocated memory for the array
-			void Offset(unsigned int); // Pushes the array by one element from index
+			void DeleteListRecursive(Node*); // Used for recursive list deletion
 	};
 }
 

@@ -24,6 +24,7 @@ std::vector<TestStruct> LoadData();
 void InitialisesWithSingleElements(std::vector<TestStruct>);
 void InitialisesWithArray(std::vector<TestStruct>);
 void InitialisesWithVector(std::vector<TestStruct>);
+void JoinsTwoTogeter(std::vector<TestStruct>, std::vector<TestStruct>);
 
 int main(int argc, char **argv)
 {
@@ -36,6 +37,8 @@ int main(int argc, char **argv)
 		InitialisesWithSingleElements(data);
 		std::cout << "Testing with vector" << std::endl;
 		InitialisesWithVector(data);
+		std::cout << "Joins two queues together" << std::endl;
+		JoinsTwoTogeter(data, data);
 	}
 	catch(std::string exception)
 	{
@@ -87,14 +90,21 @@ void InitialisesWithVector(std::vector<TestStruct> data)
 		for (unsigned int j = 0; j < data.size(); j++)
 			if (testStruct[i] == data[j]) found = true;
 		if (!found) throw std::string("Fails to initialise with vector");
-	}
-	
-	while(testStruct.Size())
+	}	
+}
+
+void JoinsTwoTogeter(std::vector<TestStruct> arr, std::vector<TestStruct> arr2)
+{
+	Uni::PriorityQueue<TestStruct> queue1 (determineWithTestStruct);
+	Uni::PriorityQueue<TestStruct> queue2 (determineWithTestStruct);
+	queue1 << arr;
+	queue2 << arr2;
+	queue1.Join(queue2);
+	while (queue1.IsEmpty())
 	{
-		TestStruct element = testStruct.Next();
+		TestStruct element = queue1.Next();
 		std::cout << element.name << " " << element.surname << " " << element.age << " " << element.money << std::endl;
 	}
-	
 }
 
 std::vector<TestStruct> LoadData()

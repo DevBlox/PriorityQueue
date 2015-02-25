@@ -2,81 +2,75 @@
 #define PRIORITY_QUEUE_IMPLEMENTATION
 
 #include <PriorityQueue.h>
+#include <iostream>
 
-template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(bool (*func)(Type, Type)) 
-	: startingReserve(200), reserveIncrement(100), currentlyAllocated(0)
+template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(bool (*func)(Type, Type))
 {
-	determine = func;
-	workingArray = new Type[startingReserve];
-	currentlyAllocated = startingReserve;
+	head = NULL;
+	tail = NULL;
 	numElements = 0;
+	determine = func;
 }
 
-template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(Type *arr, unsigned int size, bool (*func)(Type, Type)) 
-	: startingReserve(200), reserveIncrement(100), currentlyAllocated(0)
+template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(Type *arr, unsigned int size, bool (*func)(Type, Type))
 {
+	head = NULL;
+	tail = NULL;
+	numElements = 0;
 	determine = func;
-	if (size >= startingReserve)
-	{
-		unsigned int need = startingReserve;
-		while (need < size)
-			need += reserveIncrement;
-		workingArray = new Type[need];
-		currentlyAllocated = need;
-	} 
-	else
-	{
-		workingArray = new Type[startingReserve];
-		currentlyAllocated = startingReserve;
-	}
-	for (unsigned int i = 0; i < size; i++)
-		workingArray[i] = arr[i];
-	numElements = size;
+	Add(arr, size);
 }
 
 template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(std::vector<Type> arr, bool (*func)(Type, Type)) 
-		: startingReserve(200), reserveIncrement(100)
 {
+	head = NULL;
+	tail = NULL;
+	numElements = 0;
 	determine = func;
-	if (arr.size() >= startingReserve)
-	{
-		unsigned int need = startingReserve;
-		while (need < arr.size())
-			need += reserveIncrement;
-		workingArray = new Type[need];
-		currentlyAllocated = need;
-	}
-	else
-	{
-		workingArray = new Type[startingReserve];
-		currentlyAllocated = startingReserve;
-	}
-	for (unsigned int i = 0; i < arr.size(); i++)
-		workingArray[i] = arr.at(i);
-	numElements = arr.size();
+	Add(arr);
 }
 
 template<typename Type> Uni::PriorityQueue<Type>::~PriorityQueue()
 {
-	delete [] workingArray;
+	DeleteListRecursive(head);
 }
 
-template<typename Type> void Uni::PriorityQueue<Type>::Reallocate()
+template<typename Type> void Uni::PriorityQueue<Type>::DeleteListRecursive(Uni::PriorityQueue<Type>::Node *node)
 {
-	currentlyAllocated += reserveIncrement;
-	Type *newArr = new Type[currentlyAllocated];
-	for (unsigned int i = 0; i < numElements; i++)
-		newArr[i] = workingArray[i];
-	delete [] workingArray;
-	workingArray = newArr;
+	if (node->next != NULL)
+		DeleteListRecursive(node->next);
+	delete node;
 }
 
 template<typename Type> void Uni::PriorityQueue<Type>::Add(Type a)
 {
-	unsigned int i = 0;
-	while (determine(a, workingArray[i]) && i < numElements) i++;
-	Offset(i);
-	workingArray[i] = a;
+	Node *newNode = new Node(a);
+	Node *iterator = head;
+	
+	std::cout << "Add ran" << std::endl;
+	while (iterator != NULL && determine(a, iterator->data))
+		iterator = iterator->next;
+	
+	if (iterator == NULL)
+	{
+		head = newNode;
+		if (tail == NULL) tail = newNode;
+		newNode->prev = NULL;
+		newNode->next = NULL;
+	} else
+	if (iterator == head)
+	{
+		newNode->next = head;
+		head->prev = newNode;
+		head = newNode;
+		if (iterator == tail) tail = newNode;
+	} else
+	{
+		newNode->prev = iterator->prev;
+		newNode->next = iterator;
+		newNode->prev->next = newNode;
+		newNode->next->prev = newNode;
+	}
 	numElements++;
 }
 
@@ -104,23 +98,42 @@ template<typename Type> Uni::PriorityQueue<Type>& Uni::PriorityQueue<Type>::oper
 	return *this;
 }
 
-template<typename Type> void Uni::PriorityQueue<Type>::Offset(unsigned int index)
-{
-	if (!numElements) return;
-	if (numElements + 1 > currentlyAllocated) Reallocate();
-	for (unsigned int i = numElements; i > index; i--)
-		workingArray[i] = workingArray[i - 1];
-}
-
 template<typename Type> Type Uni::PriorityQueue<Type>::Next()
 {
-	if (numElements) numElements--;
-	return workingArray[numElements];
+	std::cout << "Next ran" << std::endl;
+	if (numElements == 0 || head == NULL || tail == NULL) throw "PriorityQueue is empty";
+	Type data;
+	if (head == tail)
+	{
+		std::cout << "head == tail" << std::endl;
+		data = tail->data;
+		delete tail;
+		tail = NULL;
+		head = NULL;
+	} else
+	{
+		std::cout << "else" << std::endl;
+		Node *temp = tail->prev;
+		std::cout << temp << std::endl;
+		data = tail->data;
+		delete tail;
+		temp->next = NULL;
+		std::cout << "Passed" << std::endl;
+		tail = temp;
+	}
+	return data;
 }
 
 template<typename Type> Type Uni::PriorityQueue<Type>::At(unsigned int i)
 {
-	return workingArray[i];
+	if (numElements <= i) throw "Index out of bounds";
+	unsigned int pos = 0;
+	for (Node *node = head; node != NULL; node = node->next)
+	{
+		if (pos == i) return head->data;
+		pos++;
+	}
+	return tail->data;
 }
 
 template<typename Type> Type Uni::PriorityQueue<Type>::operator[](unsigned int i)
@@ -130,28 +143,15 @@ template<typename Type> Type Uni::PriorityQueue<Type>::operator[](unsigned int i
 
 template<typename Type> void Uni::PriorityQueue<Type>::Clear()
 {
-	delete [] workingArray;
-	workingArray = new Type[startingReserve];
-	currentlyAllocated = startingReserve;
+	DeleteListRecursive(head);
+	head = NULL;
+	tail = NULL;
 	numElements = 0;
 }
 
-template<typename Type> void Uni::PriorityQueue<Type>::EraseAt(unsigned int index)
+template<typename Type> bool Uni::PriorityQueue<Type>::IsEmpty()
 {
-	numElements--;
-	for (unsigned int i = index; i < numElements; i++)
-		workingArray[i] = workingArray[i + 1];
-}
-
-template<typename Type> void Uni::PriorityQueue<Type>::Erase(Type a)
-{
-	for (unsigned int i = 0; i < numElements; i++)
-	{
-		if (workingArray[i] == a) {
-			EraseAt(i);
-			break;
-		}
-	}
+	return (numElements == 0);
 }
 
 template<typename Type> unsigned int Uni::PriorityQueue<Type>::Size()
@@ -159,4 +159,22 @@ template<typename Type> unsigned int Uni::PriorityQueue<Type>::Size()
 	return numElements;
 }
 
+template<typename Type> Uni::PriorityQueue<Type> Uni::PriorityQueue<Type>::operator+(Uni::PriorityQueue<Type> other)
+{
+	return Join(other);
+}
+
+template<typename Type> Uni::PriorityQueue<Type> Uni::PriorityQueue<Type>::Join(Uni::PriorityQueue<Type> other)
+{
+	while (!other.IsEmpty())
+		Add(other.Next());
+	return *this;
+}
+
+template<typename Type> Uni::PriorityQueue<Type>::Node::Node(Type a)
+{
+	data = a;
+	next = NULL;
+	prev = NULL;
+}
 #endif // PRIORITY_QUEUE_IMPLEMENTATION

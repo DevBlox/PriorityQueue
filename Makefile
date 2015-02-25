@@ -1,7 +1,7 @@
 CC=g++
 CROSS_COMPILE?=
 COMPILER=$(CROSS_COMPILE)$(CC)
-CFLAGS=-I./include -I. -Wall -O3
+CFLAGS=-I./include -I. -Wall -O3 -g
 LFLAGS=
 MAKE_TEST=test
 MAKE_LIB=lib
