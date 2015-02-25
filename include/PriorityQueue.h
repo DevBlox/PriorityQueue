@@ -27,7 +27,6 @@ namespace Uni
 			PriorityQueue<Type>& operator<<(Type); // These two do the same thing as Add() method
 			PriorityQueue<Type>& operator<<(std::vector<Type>);
 			Type operator[](unsigned int); // Same as At()
-			PriorityQueue<Type> operator+(PriorityQueue<Type>); // Same as Join
 			
 			/// Getting elements
 			Type Next(); // Retrieves the next element in queue and removes it
@@ -37,7 +36,7 @@ namespace Uni
 			void Clear(); // Clears the entire queue
 			
 			/// Joining
-			PriorityQueue<Type> Join(PriorityQueue<Type>); // Joint two PriorityQueue together
+			void Join(PriorityQueue<Type>&); // Joint two PriorityQueue together
 			
 			/// Checks
 			bool IsEmpty(); // Check if empty
@@ -66,5 +65,6 @@ namespace Uni
 			void DeleteListRecursive(Node*); // Used for recursive list deletion
 	};
 }
+
 
 #endif // UNI_PRIORITY_QUEUE

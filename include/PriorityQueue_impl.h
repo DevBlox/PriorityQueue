@@ -37,6 +37,7 @@ template<typename Type> Uni::PriorityQueue<Type>::~PriorityQueue()
 
 template<typename Type> void Uni::PriorityQueue<Type>::DeleteListRecursive(Uni::PriorityQueue<Type>::Node *node)
 {
+	if (node == NULL) return;
 	if (node->next != NULL)
 		DeleteListRecursive(node->next);
 	delete node;
@@ -46,30 +47,36 @@ template<typename Type> void Uni::PriorityQueue<Type>::Add(Type a)
 {
 	Node *newNode = new Node(a);
 	Node *iterator = head;
-	
-	std::cout << "Add ran" << std::endl;
-	while (iterator != NULL && determine(a, iterator->data))
-		iterator = iterator->next;
-	
-	if (iterator == NULL)
+	while (iterator != NULL)
 	{
-		head = newNode;
-		if (tail == NULL) tail = newNode;
-		newNode->prev = NULL;
-		newNode->next = NULL;
+		if (!determine(a, iterator->data))
+			break;
+		iterator = iterator->next;
+	}
+	if (iterator == NULL && iterator != head)
+	{
+		tail->next = newNode;
+		newNode->prev = tail;
+		tail = newNode;
 	} else
 	if (iterator == head)
 	{
-		newNode->next = head;
-		head->prev = newNode;
-		head = newNode;
-		if (iterator == tail) tail = newNode;
+		if (head == NULL)
+		{
+			head = newNode;
+			tail = newNode;
+		}
+		else
+		{
+			newNode->next = head;
+			head->prev = newNode;
+			head = newNode;
+		}
 	} else
 	{
 		newNode->prev = iterator->prev;
 		newNode->next = iterator;
-		newNode->prev->next = newNode;
-		newNode->next->prev = newNode;
+		iterator->prev = newNode;
 	}
 	numElements++;
 }
@@ -100,27 +107,23 @@ template<typename Type> Uni::PriorityQueue<Type>& Uni::PriorityQueue<Type>::oper
 
 template<typename Type> Type Uni::PriorityQueue<Type>::Next()
 {
-	std::cout << "Next ran" << std::endl;
 	if (numElements == 0 || head == NULL || tail == NULL) throw "PriorityQueue is empty";
 	Type data;
 	if (head == tail)
 	{
-		std::cout << "head == tail" << std::endl;
 		data = tail->data;
 		delete tail;
 		tail = NULL;
 		head = NULL;
 	} else
 	{
-		std::cout << "else" << std::endl;
 		Node *temp = tail->prev;
-		std::cout << temp << std::endl;
 		data = tail->data;
 		delete tail;
 		temp->next = NULL;
-		std::cout << "Passed" << std::endl;
 		tail = temp;
 	}
+	numElements--;
 	return data;
 }
 
@@ -151,7 +154,7 @@ template<typename Type> void Uni::PriorityQueue<Type>::Clear()
 
 template<typename Type> bool Uni::PriorityQueue<Type>::IsEmpty()
 {
-	return (numElements == 0);
+	return !numElements;
 }
 
 template<typename Type> unsigned int Uni::PriorityQueue<Type>::Size()
@@ -159,16 +162,10 @@ template<typename Type> unsigned int Uni::PriorityQueue<Type>::Size()
 	return numElements;
 }
 
-template<typename Type> Uni::PriorityQueue<Type> Uni::PriorityQueue<Type>::operator+(Uni::PriorityQueue<Type> other)
-{
-	return Join(other);
-}
-
-template<typename Type> Uni::PriorityQueue<Type> Uni::PriorityQueue<Type>::Join(Uni::PriorityQueue<Type> other)
+template<typename Type> void Uni::PriorityQueue<Type>::Join(Uni::PriorityQueue<Type> &other)
 {
 	while (!other.IsEmpty())
 		Add(other.Next());
-	return *this;
 }
 
 template<typename Type> Uni::PriorityQueue<Type>::Node::Node(Type a)
@@ -177,4 +174,5 @@ template<typename Type> Uni::PriorityQueue<Type>::Node::Node(Type a)
 	next = NULL;
 	prev = NULL;
 }
+
 #endif // PRIORITY_QUEUE_IMPLEMENTATION
