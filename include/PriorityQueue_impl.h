@@ -4,27 +4,21 @@
 #include <PriorityQueue.h>
 #include <iostream>
 
-template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(bool (*func)(Type, Type))
+template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(bool (*func)(Type, Type)) : pointer(NULL, NULL)
 {
-	head = NULL;
-	tail = NULL;
 	numElements = 0;
 	determine = func;
 }
 
-template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(Type *arr, unsigned int size, bool (*func)(Type, Type))
+template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(Type *arr, unsigned int size, bool (*func)(Type, Type)) : pointer(NULL, NULL)
 {
-	head = NULL;
-	tail = NULL;
 	numElements = 0;
 	determine = func;
 	Add(arr, size);
 }
 
-template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(std::vector<Type> arr, bool (*func)(Type, Type)) 
+template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(std::vector<Type> arr, bool (*func)(Type, Type)) : pointer(NULL, NULL)
 {
-	head = NULL;
-	tail = NULL;
 	numElements = 0;
 	determine = func;
 	Add(arr);
@@ -32,7 +26,7 @@ template<typename Type> Uni::PriorityQueue<Type>::PriorityQueue(std::vector<Type
 
 template<typename Type> Uni::PriorityQueue<Type>::~PriorityQueue()
 {
-	DeleteListRecursive(head);
+	DeleteListRecursive(pointer.head);
 }
 
 template<typename Type> void Uni::PriorityQueue<Type>::DeleteListRecursive(Uni::PriorityQueue<Type>::Node *node)
@@ -45,32 +39,40 @@ template<typename Type> void Uni::PriorityQueue<Type>::DeleteListRecursive(Uni::
 
 template<typename Type> void Uni::PriorityQueue<Type>::Add(Type a)
 {
-	Node *newNode = new Node(a);
-	Node *iterator = head;
+	Node *newNode;
+	try
+	{
+		newNode = new Node(a);
+	}
+	catch(std::bad_alloc exception)
+	{
+		throw exception.what();
+	}
+	Node *iterator = pointer.head;
 	while (iterator != NULL)
 	{
 		if (!determine(a, iterator->data))
 			break;
 		iterator = iterator->next;
 	}
-	if (iterator == NULL && iterator != head)
+	if (iterator == NULL && iterator != pointer.head)
 	{
-		tail->next = newNode;
-		newNode->prev = tail;
-		tail = newNode;
+		pointer.tail->next = newNode;
+		newNode->prev = pointer.tail;
+		pointer.tail = newNode;
 	} else
-	if (iterator == head)
+	if (iterator == pointer.head)
 	{
-		if (head == NULL)
+		if (pointer.head == NULL)
 		{
-			head = newNode;
-			tail = newNode;
+			pointer.head = newNode;
+			pointer.tail = newNode;
 		}
 		else
 		{
-			newNode->next = head;
-			head->prev = newNode;
-			head = newNode;
+			newNode->next = pointer.head;
+			pointer.head->prev = newNode;
+			pointer.head = newNode;
 		}
 	} else
 	{
@@ -107,21 +109,21 @@ template<typename Type> Uni::PriorityQueue<Type>& Uni::PriorityQueue<Type>::oper
 
 template<typename Type> Type Uni::PriorityQueue<Type>::Next()
 {
-	if (numElements == 0 || head == NULL || tail == NULL) throw "PriorityQueue is empty";
+	if (numElements == 0 || pointer.head == NULL || pointer.tail == NULL) throw "PriorityQueue is empty";
 	Type data;
-	if (head == tail)
+	if (pointer.head == pointer.tail)
 	{
-		data = tail->data;
-		delete tail;
-		tail = NULL;
-		head = NULL;
+		data = pointer.tail->data;
+		delete pointer.tail;
+		pointer.tail = NULL;
+		pointer.head = NULL;
 	} else
 	{
-		Node *temp = tail->prev;
-		data = tail->data;
-		delete tail;
+		Node *temp = pointer.tail->prev;
+		data = pointer.tail->data;
+		delete pointer.tail;
 		temp->next = NULL;
-		tail = temp;
+		pointer.tail = temp;
 	}
 	numElements--;
 	return data;
@@ -131,12 +133,12 @@ template<typename Type> Type Uni::PriorityQueue<Type>::At(unsigned int i)
 {
 	if (numElements <= i) throw "Index out of bounds";
 	unsigned int pos = 0;
-	for (Node *node = head; node != NULL; node = node->next)
+	for (Node *node = pointer.head; node != NULL; node = node->next)
 	{
-		if (pos == i) return head->data;
+		if (pos == i) return pointer.head->data;
 		pos++;
 	}
-	return tail->data;
+	return pointer.tail->data;
 }
 
 template<typename Type> Type Uni::PriorityQueue<Type>::operator[](unsigned int i)
@@ -146,9 +148,9 @@ template<typename Type> Type Uni::PriorityQueue<Type>::operator[](unsigned int i
 
 template<typename Type> void Uni::PriorityQueue<Type>::Clear()
 {
-	DeleteListRecursive(head);
-	head = NULL;
-	tail = NULL;
+	DeleteListRecursive(pointer.head);
+	pointer.head = NULL;
+	pointer.tail = NULL;
 	numElements = 0;
 }
 
@@ -173,6 +175,18 @@ template<typename Type> Uni::PriorityQueue<Type>::Node::Node(Type a)
 	data = a;
 	next = NULL;
 	prev = NULL;
+}
+
+template<typename Type> Uni::PriorityQueue<Type>::Pointer::Pointer()
+{
+	head = NULL;
+	tail = NULL;
+}
+
+template<typename Type> Uni::PriorityQueue<Type>::Pointer::Pointer(Node *begin, Node *stop)
+{
+	head = begin;
+	tail = stop;
 }
 
 #endif // PRIORITY_QUEUE_IMPLEMENTATION

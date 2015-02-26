@@ -54,8 +54,14 @@ namespace Uni
 				Node *prev;
 			};
 			
-			Node *head;
-			Node *tail;
+			struct Pointer
+			{
+				Pointer();
+				Pointer(Node*, Node*);
+				
+				Node *head;
+				Node *tail;
+			} pointer;
 		
 			unsigned int numElements; // Where is the last element located
 			
